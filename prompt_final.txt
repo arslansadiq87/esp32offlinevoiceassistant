@@ -1,0 +1,173 @@
+Create a complete PlatformIO Arduino project code for ESP32-S3.
+
+Project: Offline voice-controlled relay assistant using Edge Impulse, INMP441 microphone, ST7735 TFT display, and relay module.
+
+Generate the full src/main.cpp code.
+
+Hardware pins:
+TFT CS = GPIO15
+TFT DC = GPIO16
+TFT RST = GPIO17
+TFT MOSI = GPIO13
+TFT SCLK = GPIO14
+
+INMP441 microphone:
+WS = GPIO4
+SCK = GPIO5
+SD = GPIO6
+
+Relay:
+GPIO7
+
+Libraries:
+- Arduino.h
+- SPI.h
+- Adafruit_GFX.h
+- Adafruit_ST7735.h
+- driver/i2s_std.h
+- ESP32-S3_Voice_Assistant_inferencing.h
+
+Before including the Edge Impulse library, define:
+EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW 4
+
+Use Edge Impulse continuous audio classification.
+
+The model labels are:
+noise
+marvin
+turn_on
+turn_off
+
+Behavior:
+The system should stay in Ready mode and wait for wake word “marvin”.
+When “marvin” is detected with enough confidence, open a 10-second listening window.
+During this window, detect either “turn_on” or “turn_off”.
+If “turn_on” is detected, turn the relay ON.
+If “turn_off” is detected, turn the relay OFF.
+
+Relay must be active LOW:
+ON = LOW
+OFF = HIGH
+
+Add confidence thresholds:
+wake word threshold = 0.60
+turn_on threshold = 0.60
+turn_off threshold = 0.60
+
+Add microphone level filtering:
+wake minimum mic level = 0.08
+command minimum mic level = 0.06
+command quiet arm level = 0.04
+
+Add these timing settings:
+listening window = 10000 ms
+wake detection window = 1200 ms
+wake cooldown = 1000 ms
+command start delay = 250 ms
+command arm quiet time = 300 ms
+command max arm wait = 900 ms
+command detection window = 1500 ms
+command complete display time = 1500 ms
+mic indicator blink = 250 ms
+debug status interval = 3000 ms
+relay test interval = 2000 ms
+
+Wake word should require 3 detections before entering listening mode.
+Command should require 1 detection.
+
+Use INMP441 I2S audio input:
+- I2S port 0
+- master mode
+- 32-bit samples
+- mono
+- Philips standard
+- left slot
+- sample rate from EI_CLASSIFIER_FREQUENCY
+- DMA descriptor count 4
+- DMA frame count 512
+
+Use an inference buffer based on:
+EI_CLASSIFIER_SLICE_SIZE = EI_CLASSIFIER_RAW_SAMPLE_COUNT / EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW
+
+Read I2S 32-bit samples, shift them by 13 bits, remove DC offset, apply MIC_GAIN 3.0, constrain to int16, and feed them to Edge Impulse.
+
+Add mic input level calculation using:
+noise floor = 250.0
+full scale = 9000.0
+
+Display requirements:
+Use Adafruit_ST7735 with SPI.
+Initialize display with INITR_BLACKTAB.
+Set rotation to 1.
+Create status screens:
+- Ready: message “Say: marvin”
+- Listening...: message “Say: turn on / turn off”
+- Turning ON: message “OK”
+- Turning OFF: message “OK”
+- Error: show error message
+
+On display:
+- Draw border around screen
+- Show title “Offline Voice Assistant”
+- Show current status in center
+- Show relay state at bottom
+- Show microphone activity indicator
+- Show microphone input level meter
+
+Colors:
+Ready = white
+Listening = cyan
+Turning ON = green
+Turning OFF = red
+Error = yellow
+
+Debug:
+Enable serial debugging.
+Start Serial and Serial0 at 115200.
+Print all prediction labels and confidence values.
+Print assistant state, wake state, command armed state, mic level, and relay state.
+Print periodic status every 3 seconds.
+
+Code structure:
+Create separate functions for:
+- serial debug setup
+- debug print and printf
+- display initialization
+- centered text
+- status screen
+- mic activity indicator
+- mic level meter
+- ready screen
+- listening screen
+- turning on screen
+- turning off screen
+- error screen
+- relay initialization
+- relay on
+- relay off
+- relay test mode
+- I2S microphone initialization
+- reading microphone samples
+- Edge Impulse signal callback
+- prediction debug printing
+- wake candidate reset
+- command candidate reset
+- command arming reset
+- command arming update
+- command label checking
+- command threshold selection
+- entering listening mode
+- exiting listening mode
+- wake candidate handling
+- detected command handling
+- voice inference loop
+- Arduino setup
+- Arduino loop
+
+Add a relayTestMode boolean set to false.
+If relayTestMode is true, toggle the relay every 2 seconds and show relay test status.
+Otherwise run the voice assistant.
+
+The final output must be clean, complete, compilable Arduino C++ code for PlatformIO src/main.cpp.
+Do not give explanations.
+Only output the code.

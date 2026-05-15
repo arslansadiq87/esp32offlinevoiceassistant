@@ -1,0 +1,20 @@
+# Build output and dependency caches
+.pio/
+**/.pio/
+.vscode/
+
+# Python cache files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Trained model exports and generated inference artifacts
+trainded model/
+trained model/
+model_training/ei-*/
+model_training/*.zip
+code/lib/ESP32-S3_Voice_Assistant_inferencing/
+
+# Common temporary files
+*.tmp
+*.log

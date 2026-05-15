@@ -1,0 +1,151 @@
+Create a complete ESP32-S3 voice data recorder system using PlatformIO and Python.
+
+The project consists of two parts:
+
+1. ESP32-S3 firmware (Arduino framework, PlatformIO)
+2. Python script to record labeled audio samples via Serial
+
+========================
+PART 1: ESP32-S3 FIRMWARE
+========================
+
+Requirements:
+
+- Board: esp32-s3-devkitc-1
+- Framework: Arduino
+- Use I2S microphone (INMP441)
+- Use ST7735 TFT display (SPI)
+- High-speed serial communication at 921600 baud
+
+Pin configuration:
+
+I2S:
+- WS = GPIO 4
+- SCK = GPIO 5
+- SD = GPIO 6
+
+TFT:
+- CS = GPIO 15
+- DC = GPIO 16
+- RST = GPIO 17
+- MOSI = GPIO 13
+- SCLK = GPIO 14
+
+Features:
+
+1. Initialize I2S microphone at:
+   - Sample rate: 16000 Hz
+   - 32-bit input, convert to 16-bit PCM
+   - Apply software gain
+
+2. Display status messages on TFT:
+   - “Recorder Ready”
+   - “Recording Marvin”
+   - “Recording Turn On”
+   - “Recording Turn Off”
+   - “Recording Noise”
+   - “Audio Sent”
+
+3. Continuously show microphone level on screen
+
+4. Listen for serial commands:
+   - 'M' → record 2 seconds (marvin)
+   - 'O' → record 2.5 seconds (turn_on)
+   - 'F' → record 2.5 seconds (turn_off)
+   - 'N' → record 2.5 seconds (noise)
+
+5. When command received:
+   - Send "START_AUDIO"
+   - Stream raw PCM16 audio
+   - Send "END_AUDIO"
+
+6. Use efficient buffering (DMA, chunk reads)
+
+7. Clean, well-structured code (functions for display, mic, recording)
+
+Also generate:
+- platformio.ini with correct settings
+- Required libraries:
+  - Adafruit GFX
+  - Adafruit ST7735
+
+========================
+PART 2: PYTHON SCRIPT
+========================
+
+Create a Python script using:
+
+- pyserial
+- wave
+- array
+- math
+
+Features:
+
+1. Connect to ESP32 via serial (921600 baud)
+
+2. Provide label menu:
+   1 = marvin
+   2 = turn_on
+   3 = turn_off
+   4 = noise
+
+3. Send commands:
+   - marvin → 'M'
+   - turn_on → 'O'
+   - turn_off → 'F'
+   - noise → 'N'
+
+4. Wait for "START_AUDIO"
+
+5. Read exact number of bytes:
+   - marvin = 2 sec
+   - others = 2.5 sec
+   - sample rate = 16kHz
+   - 16-bit mono
+
+6. Wait for "END_AUDIO"
+
+7. Save WAV file in folders:
+   - marvin/
+   - turn_on/
+   - turn_off/
+   - noise/
+
+8. Automatically name files:
+   marvin_001.wav, marvin_002.wav, etc.
+
+9. Add audio quality analysis:
+   - RMS level
+   - Peak level
+   - Clipping detection
+   - Voice activity detection
+
+10. Show warnings:
+   - Too quiet
+   - Clipping
+   - Too much silence
+   - Speech cut at start/end
+
+11. Ask user:
+   "Save this sample anyway? (y/n)"
+
+12. Loop recording until user quits
+
+========================
+GENERAL REQUIREMENTS
+========================
+
+- Code must be clean and production-ready
+- Add comments for clarity
+- Use modular functions
+- Ensure reliable serial communication
+- Handle timeouts and errors properly
+
+Output:
+
+1. main.cpp
+2. platformio.ini
+3. record.py
+
+Make sure everything works together end-to-end.
